@@ -1,0 +1,5 @@
+zenml
+pandas
+scikit-learn
+matplotlib
+numpy
