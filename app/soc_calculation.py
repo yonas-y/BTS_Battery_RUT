@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from pymongo import errors
 from tqdm import tqdm
-from app.config import sampling_time
+from app.config import sampling_time, full_stamp_sample
 from app.config import client
 
 # Connect to the database!
@@ -50,8 +50,12 @@ for bts_id in tqdm(unique_bts_ids, desc="Processing BTS IDs"):
     BC = df_filled['Battery Current(A)'].values
     AC = df_filled['AC/DC System Output Current(A)'].values
 
+    full_stamp = full_stamp_sample[bts_id]
+
     Q = np.zeros(len(df_filled))
-    for m in range(1, len(BC)):
+    # Calculate the SoC in the forward direction!!!
+    for m in range(full_stamp, len(BC)):
+        Q[m] = Q[m - 1] + sampling_time * BC[m] * -1
         if (5 > BC[m] > -5 and AC[m] > 10) or (Q[m] < 0):
             """
             If the AC is ON and the battery is not charging, then we deduce it's Full.
@@ -59,13 +63,14 @@ for bts_id in tqdm(unique_bts_ids, desc="Processing BTS IDs"):
             Q = 0, Full battery status!
             """
             Q[m] = 0
-        else:
-            """
-            It is charging or discharging.
-            """
-            Q[m] = Q[m - 1] + sampling_time * BC[m] * -1
 
-    df_filled['SoC'] = Q
+    # Calculate the SoC in the backward direction!!!
+    for m in range(full_stamp - 1, -1, -1):
+        Q[m] = Q[m + 1] - sampling_time * BC[m] * -1
+        if (5 > BC[m] > -5 and AC[m] > 10) or (Q[m] < 0):
+            Q[m] = 0
+
+    df_filled['Q Extracted'] = Q
 
     # Convert to records for MongoDB
     records = df_filled.to_dict(orient='records')
