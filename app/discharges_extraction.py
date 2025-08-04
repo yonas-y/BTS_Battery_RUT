@@ -36,4 +36,8 @@ def bts_discharges(bts_dataframe):
 
     return np.array(discharges_list)
 
+# ====== Connect to MongoDB and import data from a selected BTS! ====== #
+db = client["BTS_Dataset"]
+collection = db["bts_oper_data_soc"]
+unique_bts_ids = collection.distinct("bts_id")
 
