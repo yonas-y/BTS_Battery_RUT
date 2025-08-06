@@ -31,14 +31,41 @@ ENV/
 env.bak/
 venv.bak/
 
-# PyCharm
-.idea/
+# IDEs
+.idea/                # PyCharm
+.vscode/              # VS Code
+.history/             # VS Code extension
+*.code-workspace      # VS Code workspace files
 
-# VS Code (just in case)
-.vscode/
+# VS Code remote/server folders
+.vscode-test/
+.vscode-remote/
+.vscode-server/
+.vscode-oss/
+.vscode-insiders/
+.vscode-exploration/
+.vscode-custom/
+.vscode-extensions/
+.vscode-local/
+.vscode-backup/
+.vscode-logs/
+.vscode-sftp.json
+.vscode-ssh.json
+.vscode-tunnel.json
+.vscode-remote.json
+.vscode/settings.json
+.vscode/tasks.json
+.vscode/launch.json
+.vscode/extensions.json
+.vscode/*.code-snippets
 
-# Jupyter Notebook checkpoints
+# Jupyter Notebook
 .ipynb_checkpoints/
+*.nbconvert.ipynb
+test_notebook.ipynb
+
+# Jupyter runtime
+~$*
 
 # IPython history
 .history
