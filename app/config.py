@@ -3,6 +3,11 @@ from pymongo import MongoClient
 
 # MongoDB connection!
 MONGO_URI = "mongodb://192.168.80.1:27017"
+DATABASE_NAME = "BTS_Dataset"
+COLLECTION_NAME = "bts_oper_data_soc"
+UNIQUE_ID = "bts_id"
+
+# Create a MongoDB client
 client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=3000)
 
 # Paths!
