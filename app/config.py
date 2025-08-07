@@ -14,7 +14,7 @@ client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=3000)
 # Paths!
 operational_data_dir = Path("../../../Datasets/BTS/csv_files/operational_data/used_btss")
 fault_alarm_data_dir = Path("../../../Datasets/BTS/csv_files/fault/")
-OUTPUT_DIR = Path("output/")
+OUTPUT_DIR = Path("outputs/")
 
 # Configurable parameters
 sampling_time = 5 / 60  # Sampling time of the time series data!
