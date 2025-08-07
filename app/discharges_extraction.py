@@ -1,14 +1,8 @@
 # ===== Load packages ====== #
 import numpy as np
 import pandas as pd
-import pickle
-import os
 from typing import Dict, List, Any
-
-# Configurable parameters
-VOLTAGE_THRESHOLD = 46.2
-CURRENT_DROP_RATIO = 0.2
-TIME_STEP_MINUTES = 5
+from app.config import VOLTAGE_THRESHOLD, TIME_STEP_MINUTES
 
 def bts_discharges(bts_dataframe: pd.DataFrame) -> np.ndarray:
     """
@@ -37,13 +31,14 @@ def process_discharge(
     bts_considered: pd.DataFrame,
     discharge: np.ndarray,
     voltage_threshold: float = VOLTAGE_THRESHOLD,
-    current_drop_ratio: float = CURRENT_DROP_RATIO,
-    time_step_minutes: int = TIME_STEP_MINUTES
+    time_step_minutes: float = TIME_STEP_MINUTES
 ) -> List[Any]:
     """
     Post-process a single discharge: shift times, check voltage, trim end.
     Returns [start_shifted, end_shifted] or None if not valid.
     """
+    current_drop_ratio = 0.2
+
     step = pd.Timedelta(minutes=time_step_minutes)
     start_shifted = discharge[0] + step
     end_shifted = discharge[1] - step
@@ -62,48 +57,45 @@ def process_discharge(
                 break
         except KeyError:
             continue
-    return [start_shifted, end_shifted]
+    return [start_shifted.isoformat(), end_shifted.isoformat()]
 
 def extract_all_discharges(
-    client,
-    output_dir: str,
+    bts_data: Dict[str, pd.DataFrame],
     voltage_threshold: float = VOLTAGE_THRESHOLD,
-    current_drop_ratio: float = CURRENT_DROP_RATIO,
-    time_step_minutes: int = TIME_STEP_MINUTES
-) -> Dict[str, List[List[Any]]]:
+    time_step_minutes: float = TIME_STEP_MINUTES
+) -> Dict:
     """
     Main extraction function for all BTS discharges.
     Returns a dictionary of bts_id -> list of [start, end] discharges.
     """
-    db = client["BTS_Dataset"]
-    collection = db["bts_oper_data_soc"]
-    unique_bts_ids = collection.distinct("bts_id")
+
     all_BTS_discharges_dict = {}
 
-    for bts_id in unique_bts_ids:
-        bts_considered = pd.DataFrame(list(collection.find({"bts_id": bts_id})))
+    for bts_id, bts_considered in bts_data.items():
         if bts_considered.empty or 'timestamp' not in bts_considered.columns:
             continue
+
+        # Convert 'timestamp' to native Python datetime (avoid pandas.Timestamp)
+        bts_considered['timestamp'] = bts_considered['timestamp'].apply(lambda x: x.to_pydatetime())
+        
+        # Now set as index
         bts_considered.set_index('timestamp', inplace=True)
         BTS_Discharges = bts_discharges(bts_considered)
         if BTS_Discharges.size == 0:
             continue
+        
         BTS_Discharges_Sorted = BTS_Discharges[BTS_Discharges[:, 2].astype(int).argsort()[::-1]]
 
         updated_discharges = []
         for discharge in BTS_Discharges_Sorted:
             result = process_discharge(
                 bts_considered, discharge,
-                voltage_threshold, current_drop_ratio, time_step_minutes
+                voltage_threshold, 
+                time_step_minutes
             )
             if result:
                 updated_discharges.append(result)
         if updated_discharges:
             all_BTS_discharges_dict[bts_id] = updated_discharges
-
-    os.makedirs(output_dir, exist_ok=True)
-    output_path = os.path.join(output_dir, 'all_BTS_discharges_dict.pkl')
-    with open(output_path, 'wb') as handle:
-        pickle.dump(all_BTS_discharges_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     return all_BTS_discharges_dict
