@@ -2,12 +2,11 @@ from zenml import step
 from typing import Dict
 import logging
 from app.data_importing import export_BTS_data
-from app.config import MONGO_URI, DATABASE_NAME, COLLECTION_NAME
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-@step(name="data_import_step", enable_cache=True)
+@step(name="data_import_step", enable_cache=False)
 def data_import_step(uri, 
                      db_name, 
                      collection_name, 
