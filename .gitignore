@@ -104,7 +104,7 @@ coverage.xml
 .prof
 
 # Test outputs
-output/
+outputs/
 
-# Test Jupyter Script!!
-test_notebook.ipynb
+# zenml
+.zen/
