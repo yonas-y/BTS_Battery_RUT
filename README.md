@@ -53,9 +53,11 @@ For benchmarking, a **feedforward neural network (FNN)** is also evaluated for v
 
 ### 3. RUT Estimation
 - RUT is defined as the time until battery voltage reaches the cut-off level:
+- 
   ```math
   RUT = t_e - t_0
   ```
+  
 - Where `t0` is the current time and `te` is the time at cut-off voltage.
 - The method **quantifies uncertainty via prediction intervals** (lower and upper bounds).
 - This allows operators to plan maintenance **before service interruption occurs**, accounting for variability in load and battery behavior.
@@ -65,7 +67,7 @@ For benchmarking, a **feedforward neural network (FNN)** is also evaluated for v
 ## 🧰 Tools & Frameworks
 - **Python Libraries:** NumPy, SciPy, Pandas, statsmodels, scikit-learn, TensorFlow
 - **Forecasting Models:** SARIMAX, LSTM 
-- **Battery Models:** modified Shepherd equation, FNN
+- **Battery Models:** Modified Shepherd equation, FNN
 - **Visualization:** Matplotlib, Seaborn
 - **MLOps:** ZenML  
 
